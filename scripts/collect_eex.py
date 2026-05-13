@@ -1,6 +1,6 @@
 """
-Collecte des settlement prices EEX pour Power FR et Natural Gas TTF.
-Deux onglets Excel : "Power FR" et "Natural Gas TTF".
+Collecte des settlement prices EEX pour Power FR et Natural Gas PEG.
+Deux onglets Excel : "Power FR" et "Natural Gas PEG".
 """
 
 import os
@@ -35,7 +35,7 @@ HEADERS = ["Date", "Contrat", "Type", "Prix (€/MWh)", "Source"]
 # Onglet par commodité
 SHEET_MAP = {
     "Power FR":        ["Power FR Baseload", "Power FR Peakload"],
-    "Natural Gas TTF": ["Natural Gas TTF"],
+    "Natural Gas PEG": ["Natural Gas PEG"],
 }
 
 # Largeurs de colonnes : Date, Contrat, Type, Prix, Source
@@ -95,29 +95,29 @@ def build_contracts():
                        "commodity": "POWER", "pricing": "F", "maturity": f"{year}01"},
         })
 
-    # Natural Gas TTF ── CAL 2027-2030
+    # Natural Gas PEG ── CAL 2027-2030
     for year in range(2027, 2031):
         contracts.append({
-            "label": f"GAZ-CAL-{year}", "commodite": "Natural Gas TTF", "type": "CAL",
-            "params": {"shortCode": "G3BY", "area": "TTF", "product": "Physical",
+            "label": f"GAZ-CAL-{year}", "commodite": "Natural Gas PEG", "type": "CAL",
+            "params": {"shortCode": "G5BY", "area": "PEG", "product": "Physical",
                        "commodity": "NATGAS", "pricing": "F", "maturity": f"{year}01"},
         })
 
-    # Natural Gas TTF ── QTR 2027-2030
+    # Natural Gas PEG ── QTR 2027-2030
     for year in range(2027, 2031):
         for q, month in enumerate(["01", "04", "07", "10"], start=1):
             contracts.append({
-                "label": f"GAZ-Q{q}-{year}", "commodite": "Natural Gas TTF", "type": "QTR",
-                "params": {"shortCode": "G3BQ", "area": "TTF", "product": "Physical",
+                "label": f"GAZ-Q{q}-{year}", "commodite": "Natural Gas PEG", "type": "QTR",
+                "params": {"shortCode": "G5BQ", "area": "PEG", "product": "Physical",
                            "commodity": "NATGAS", "pricing": "F", "maturity": f"{year}{month}"},
             })
 
-    # Natural Gas TTF ── MTH : mois courant + 17 mois suivants
+    # Natural Gas PEG ── MTH : mois courant + 17 mois suivants
     for i in range(18):
         m = today + relativedelta(months=i)
         contracts.append({
-            "label": f"GAZ-{m.strftime('%b')}-{m.year}", "commodite": "Natural Gas TTF", "type": "MTH",
-            "params": {"shortCode": "G3BM", "area": "TTF", "product": "Physical",
+            "label": f"GAZ-{m.strftime('%b')}-{m.year}", "commodite": "Natural Gas PEG", "type": "MTH",
+            "params": {"shortCode": "G5BM", "area": "PEG", "product": "Physical",
                        "commodity": "NATGAS", "pricing": "F", "maturity": m.strftime("%Y%m")},
         })
 
