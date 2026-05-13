@@ -36,15 +36,3 @@ jobs:
           git add data/eex_prix.xlsx
           git diff --cached --quiet || git commit -m "data: EEX prices $(date +'%Y-%m-%d')"
           git push
-
-      - name: Install rclone
-        run: |
-          curl -s https://rclone.org/install.sh | sudo bash
-
-      - name: Sync to OneDrive
-        env:
-          RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
-        run: |
-          mkdir -p ~/.config/rclone
-          echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
-          rclone copy data/eex_prix.xlsx onedrive:EEX/ --log-level INFO
