@@ -186,7 +186,7 @@ def format_sheet(ws):
             cell.fill   = fill
             cell.border = BORDER
             if col_idx == 4:  # Prix
-                cell.number_format = '#,##0.00'
+                cell.number_format = '#,##0.000'
                 cell.alignment = Alignment(horizontal="right", vertical="center")
             else:
                 cell.alignment = Alignment(horizontal="center", vertical="center")

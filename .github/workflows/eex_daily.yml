@@ -2,10 +2,10 @@ name: EEX Daily Price Collection
 
 on:
   schedule:
-    # 9h15 CET = 8h15 UTC (hiver) / 7h15 UTC (été)
+    # 2h00 CET = 1h00 UTC (hiver) / 0h00 UTC (été)
     # On lance les deux pour couvrir le changement d'heure
-    - cron: "15 8 * * 1-5"   # hiver (CET = UTC+1)
-    - cron: "15 7 * * 1-5"   # été   (CEST = UTC+2)
+    - cron: "0 1 * * 1-5"    # hiver (CET = UTC+1)
+    - cron: "0 0 * * 1-5"    # été   (CEST = UTC+2)
   workflow_dispatch:
 
 permissions:
