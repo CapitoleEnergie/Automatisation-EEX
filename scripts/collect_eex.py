@@ -23,6 +23,13 @@ if hasattr(sys.stdout, "reconfigure"):
 BASE_URL = "https://api.eex-group.com/pub/market-data/price-ticker"
 EXCEL_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "eex_prix.xlsx")
 
+REQUEST_HEADERS = {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "Accept-Language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Origin": "https://www.eex.com",
+    "Referer": "https://www.eex.com/",
+}
+
 YELLOW_FILL = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
 
 HEADERS = ["Date", "Contrat", "Commodite", "Type", "Settlement_Price", "Source_Prix"]
@@ -44,8 +51,8 @@ def build_contracts():
             "params": {
                 "shortCode": "F7BY",
                 "area": "FR",
-                "product": "EEX Power Derivatives France",
-                "commodity": "Power",
+                "product": "Base",
+                "commodity": "POWER",
                 "pricing": "F",
                 "maturity": f"{year}01",
             },
@@ -59,10 +66,10 @@ def build_contracts():
                 "commodite": "Power FR Baseload",
                 "type": "QTR",
                 "params": {
-                    "shortCode": "F7BY",
+                    "shortCode": "F7BQ",
                     "area": "FR",
-                    "product": "EEX Power Derivatives France",
-                    "commodity": "Power",
+                    "product": "Base",
+                    "commodity": "POWER",
                     "pricing": "F",
                     "maturity": f"{year}{month}",
                 },
@@ -76,10 +83,10 @@ def build_contracts():
             "commodite": "Power FR Baseload",
             "type": "MTH",
             "params": {
-                "shortCode": "F7BY",
+                "shortCode": "F7BM",
                 "area": "FR",
-                "product": "EEX Power Derivatives France",
-                "commodity": "Power",
+                "product": "Base",
+                "commodity": "POWER",
                 "pricing": "F",
                 "maturity": m.strftime("%Y%m"),
             },
@@ -94,58 +101,58 @@ def build_contracts():
             "params": {
                 "shortCode": "F7PY",
                 "area": "FR",
-                "product": "EEX Power Derivatives France",
-                "commodity": "Power",
+                "product": "Peak",
+                "commodity": "POWER",
                 "pricing": "F",
                 "maturity": f"{year}01",
             },
         })
 
-    # Natural Gas PEG ── CAL 2027-2030
+    # Natural Gas TTF ── CAL 2027-2030
     for year in range(2027, 2031):
         contracts.append({
             "label": f"GAZ-CAL-{year}",
-            "commodite": "Natural Gas PEG",
+            "commodite": "Natural Gas TTF",
             "type": "CAL",
             "params": {
-                "shortCode": "FNGPEG",
-                "area": "FR",
-                "product": "EEX Natural Gas Derivatives",
-                "commodity": "Gas",
+                "shortCode": "G3BY",
+                "area": "TTF",
+                "product": "Physical",
+                "commodity": "NATGAS",
                 "pricing": "F",
                 "maturity": f"{year}01",
             },
         })
 
-    # Natural Gas PEG ── QTR 2027-2030
+    # Natural Gas TTF ── QTR 2027-2030
     for year in range(2027, 2031):
         for q, month in enumerate(["01", "04", "07", "10"], start=1):
             contracts.append({
                 "label": f"GAZ-Q{q}-{year}",
-                "commodite": "Natural Gas PEG",
+                "commodite": "Natural Gas TTF",
                 "type": "QTR",
                 "params": {
-                    "shortCode": "FNGPEG",
-                    "area": "FR",
-                    "product": "EEX Natural Gas Derivatives",
-                    "commodity": "Gas",
+                    "shortCode": "G3BQ",
+                    "area": "TTF",
+                    "product": "Physical",
+                    "commodity": "NATGAS",
                     "pricing": "F",
                     "maturity": f"{year}{month}",
                 },
             })
 
-    # Natural Gas PEG ── MTH : mois courant + 17 mois suivants
+    # Natural Gas TTF ── MTH : mois courant + 17 mois suivants
     for i in range(18):
         m = today + relativedelta(months=i)
         contracts.append({
             "label": f"GAZ-{m.strftime('%b')}-{m.year}",
-            "commodite": "Natural Gas PEG",
+            "commodite": "Natural Gas TTF",
             "type": "MTH",
             "params": {
-                "shortCode": "FNGPEG",
-                "area": "FR",
-                "product": "EEX Natural Gas Derivatives",
-                "commodity": "Gas",
+                "shortCode": "G3BM",
+                "area": "TTF",
+                "product": "Physical",
+                "commodity": "NATGAS",
                 "pricing": "F",
                 "maturity": m.strftime("%Y%m"),
             },
@@ -160,10 +167,16 @@ def build_contracts():
 
 def fetch_settlement(params: dict) -> float | None:
     try:
-        r = requests.get(BASE_URL, params=params, timeout=15)
+        r = requests.get(BASE_URL, params=params, headers=REQUEST_HEADERS, timeout=15)
         r.raise_for_status()
         data = r.json()
-        price = data.get("settlementPrice")
+        # Format: {"header": ["lastUpdatedAt", "settlPx", ...], "data": [[...val...]]}
+        rows = data.get("data")
+        if not rows:
+            return None
+        headers = data.get("header", [])
+        idx = headers.index("settlPx") if "settlPx" in headers else 1
+        price = rows[0][idx]
         if price is None or price == "":
             return None
         return float(price)
