@@ -20,7 +20,7 @@ from datetime import date
 # ---------------------------------------------------------------------------
 
 EXCEL_PATH    = os.path.join(os.path.dirname(__file__), "..", "data", "eex_prix.xlsx")
-REMOTE_FOLDER = "TEST INTEGRATION PRIX IA"
+REMOTE_FOLDER = "TEST EEX"
 REMOTE_FILE   = "eex_prix.xlsx"
 
 GRAPH_AUTH_URL = "https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
