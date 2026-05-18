@@ -2,10 +2,8 @@ name: EEX Daily Price Collection
 
 on:
   schedule:
-    # 2h00 CET = 1h00 UTC (hiver) / 0h00 UTC (été)
-    # On lance les deux pour couvrir le changement d'heure
-    - cron: "0 1 * * 1-5"    # hiver (CET = UTC+1)
-    - cron: "0 0 * * 1-5"    # été   (CEST = UTC+2)
+    - cron: "0 1 * * 1-5"    # hiver : 1h00 UTC = 2h00 CET
+    - cron: "0 0 * * 1-5"    # été   : 0h00 UTC = 2h00 CEST
   workflow_dispatch:
 
 permissions:
@@ -39,3 +37,15 @@ jobs:
           git add data/eex_prix.xlsx
           git diff --cached --quiet || git commit -m "data: EEX prices $(date +'%Y-%m-%d')"
           git push
+
+      # ---------------------------------------------------------------
+      # Nouveau step : upload vers SharePoint via Microsoft Graph API
+      # ---------------------------------------------------------------
+      - name: Upload to SharePoint
+        env:
+          SP_TENANT_ID:     ${{ secrets.SP_TENANT_ID }}
+          SP_CLIENT_ID:     ${{ secrets.SP_CLIENT_ID }}
+          SP_CLIENT_SECRET: ${{ secrets.SP_CLIENT_SECRET }}
+          SP_SITE_ID:       ${{ secrets.SP_SITE_ID }}
+          SP_DRIVE_ID:      ${{ secrets.SP_DRIVE_ID }}
+        run: python scripts/upload_sharepoint.py
